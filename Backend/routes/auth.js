@@ -29,20 +29,36 @@ router.post('/signup', async (req, res) => {
             walletAddress: walletAddress || null
         });
 
+        // Generate private and public keys
+        const keypair = new Keypair();
+
+        const privateKey = JSON.stringify(Array.from(keypair.secretKey));
+        const publicKey = keypair.publicKey.toString();
+
+        console.log("Generated keys for user:", {
+            email,
+            privateKeyLength: privateKey.length,
+            publicKey: publicKey
+        });
+
+        // Save the keys to the user document
+        user.privateKey = privateKey;
+        user.publicKey = publicKey;
+
         await user.save();
+        
+        console.log("User saved with keys:", {
+            userId: user._id,
+            hasPrivateKey: !!user.privateKey,
+            hasPublicKey: !!user.publicKey
+        });
 
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id, email: user.email },
             process.env.JWT_SECRET || 'fallback_jwt_secret',
-            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+            { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
         );
-
-        // Generate private and public keys
-        const keypair = new Keypair();
-
-        const privateKey = keypair.secretKey.toString();
-        const publicKey = keypair.publicKey.toString();
 
         res.status(201).json({
             success: true,
@@ -94,7 +110,7 @@ router.post('/signin', async (req, res) => {
         const token = jwt.sign(
             { userId: user._id, email: user.email },
             process.env.JWT_SECRET || 'fallback_jwt_secret',
-            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+            { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
         );
 
         res.json({
