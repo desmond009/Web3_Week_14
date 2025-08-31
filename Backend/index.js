@@ -6,6 +6,8 @@ import authRoutes from "./routes/auth.js";
 import { authenticateToken } from "./middleware/auth.js";
 import { Transaction, Connection, Keypair } from "@solana/web3.js";
 import User from "./models/User.js";
+import bs58 from 'bs58';
+
 
 
 
@@ -62,16 +64,14 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res) => {
         // Convert the stored private key string back to a Keypair
         console.log("Raw private key from DB:", user.privateKey);
         
-        const privateKeyArray = JSON.parse(user.privateKey);
-        console.log("Parsed private key array:", privateKeyArray);
-        console.log("Array type:", typeof privateKeyArray);
-        console.log("Array length:", privateKeyArray.length);
+        // Import bs58 for decoding
+        // const bs58 = await import('bs58');
         
-        const uint8Array = new Uint8Array(privateKeyArray);
-        console.log("Uint8Array created:", uint8Array);
-        console.log("Uint8Array length:", uint8Array.length);
+        // Decode the bs58 private key back to Uint8Array
+        const privateKeyBytes = bs58.decode(user.privateKey);
+        console.log("Decoded private key bytes length:", privateKeyBytes.length);
         
-        const userKeypair = Keypair.fromSecretKey(uint8Array);
+        const userKeypair = Keypair.fromSecretKey(privateKeyBytes);
         console.log("User keypair created successfully");
         console.log("Keypair object:", userKeypair);
         console.log("Public key:", userKeypair.publicKey.toString());

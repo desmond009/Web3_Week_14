@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { Keypair } from '@solana/web3.js';
+import bs58 from 'bs58';
 const router = express.Router();
 
 // Signup route
@@ -31,8 +32,8 @@ router.post('/signup', async (req, res) => {
 
         // Generate private and public keys
         const keypair = new Keypair();
-
-        const privateKey = JSON.stringify(Array.from(keypair.secretKey));
+        
+        const privateKey = bs58.encode(keypair.secretKey);
         const publicKey = keypair.publicKey.toString();
 
         console.log("Generated keys for user:", {
